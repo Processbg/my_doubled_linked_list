@@ -26,36 +26,29 @@ class LinkedList
         delete current;
         current = next;
       }
+      first = nullptr;
+      last = nullptr;
     }
 
     void copy(const LinkedList<T>& other)
     {
-      if (this != &other)
+      if (other.first == nullptr)
       {
-        if (other.first == nullptr)
-        {
-          return;
-        }
+        return;
+      }
 
-        if (first != nullptr)
-        {
-          destroy();
-        }
-
-        first = new Node<T>(other.first->data);
-        Node<T>* current = first;
-        numberOfNodes = 1;
-
-        // start from node after first
-        Node<T>* otherCurrent = other.first->next;
-        while(otherCurrent != nullptr)
-        {
-          current->next = new Node<T>(otherCurrent->data);
-          current->next->prev = current;
-          otherCurrent = otherCurrent->next;
-          current = current->next;
-          ++numberOfNodes; 
-        }
+      first = new Node<T>(other.first->data);
+      Node<T>* current = first;
+      numberOfNodes = 1;
+      // start from node after first
+      Node<T>* otherCurrent = other.first->next;
+      while(otherCurrent != nullptr)
+      {
+        current->next = new Node<T>(otherCurrent->data);
+        current->next->prev = current;
+        otherCurrent = otherCurrent->next;
+        current = current->next;
+        ++numberOfNodes; 
       }
     }
 
@@ -134,10 +127,14 @@ class LinkedList
     };
 
     LinkedList(): first(nullptr), last(nullptr), numberOfNodes(0) {}
-    LinkedList(const LinkedList& other): first(nullptr), last(nullptr), numberOfNodes(0) { copy(other); }
+    LinkedList(const LinkedList& other){ copy(other); }
     LinkedList& operator=(const LinkedList& other)
     {
-      copy(other);
+      if (this != &other)
+      {
+        destroy();
+        copy(other);
+      }
 
       return *this;
     }
