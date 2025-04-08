@@ -19,11 +19,12 @@ class LinkedList
 
     void destroy()
     {
-      while (first != nullptr)
+      Node<T>* current = first;
+      while (current != nullptr)
       {
-        Node<T>* toBeDeleted = first;
-        first = first->next;
-        delete toBeDeleted;
+        Node<T>* next = current->next;
+        delete current;
+        current = next;
       }
     }
 
@@ -34,6 +35,11 @@ class LinkedList
         if (other.first == nullptr)
         {
           return;
+        }
+
+        if (first != nullptr)
+        {
+          destroy();
         }
 
         first = new Node<T>(other.first->data);
@@ -128,7 +134,7 @@ class LinkedList
     };
 
     LinkedList(): first(nullptr), last(nullptr), numberOfNodes(0) {}
-    LinkedList(const LinkedList& other) { copy(other); }
+    LinkedList(const LinkedList& other): first(nullptr), last(nullptr), numberOfNodes(0) { copy(other); }
     LinkedList& operator=(const LinkedList& other)
     {
       copy(other);
@@ -136,6 +142,7 @@ class LinkedList
       return *this;
     }
     ~LinkedList() { destroy(); }
+
     Iterator begin() const { return Iterator(first); }
     Iterator end() const { return Iterator(); }
     bool isEmpty() const { return numberOfNodes == 0; }
@@ -172,7 +179,10 @@ class LinkedList
       Node<T>* toPop = first;
       T toPopData = toPop->data;
       // make sure that the node after the first has previous null
-      first->next->prev = nullptr;
+      if (first->next != nullptr)
+      {
+        first->next->prev = nullptr;
+      }
       first = first->next;
       delete toPop;
       --numberOfNodes;
@@ -184,7 +194,10 @@ class LinkedList
       Node<T>* toPop = last;
       T toPopData = toPop->data;
       // make sure that the node before the last has next null
-      last->prev->next = nullptr;
+      if (last->prev != nullptr)
+      {
+        last->prev->next = nullptr;
+      }
       last = last->prev;
       delete toPop;
       --numberOfNodes;
