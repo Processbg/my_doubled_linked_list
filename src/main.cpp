@@ -96,6 +96,43 @@ class LinkedList
       return merge(mergeSortPrivate(left), mergeSortPrivate(right));
     }
 
+    Node<T>* getMiddle(Node<T>* start, Node<T>* end)
+    {
+      Node<T>* slow = start;
+      Node<T>* fast = start;
+
+      while (fast != end && fast->next != end)
+      {
+        slow = slow->next;
+        fast = fast->next->next; 
+      }
+
+      return slow;
+    }
+
+    Node<T>* binarySearchPrivate(Node<T>* start, Node<T>* end, const T& value)
+    {
+      if (start == end)
+      {
+        return nullptr;
+      }
+
+      Node<T>* mid = getMiddle(start, end);
+
+      if (mid->data == value)
+      {
+        return mid;
+      }
+      else if (value < mid->data)
+      {
+        return binarySearchPrivate(start, mid, value);
+      }
+      else
+      {
+        return binarySearchPrivate(mid->next, end, value);
+      }
+    }
+
   public:
     class Iterator 
     {
@@ -202,38 +239,15 @@ class LinkedList
     }
     
     void mergeSort() { first = mergeSortPrivate(first); }
-
-    Node<T>* getNodeAtIndex(size_t index) const
+    bool binarySearch(const T& value)
     {
-      if (index < 0 || index >= numberOfNodes)
+      Node<T>* found = binarySearchPrivate(first, last, value);
+      if (!found)
       {
-        std::cerr << "Given index: " << index << "is bigger or equal to lists size.\n"; 
-        return nullptr;
+        return false;
       }
 
-      if (index == 0)
-      {
-        return first;
-      }
-      else if (index == numberOfNodes - 1)
-      {
-        return last;
-      }
-
-      size_t i = 0;
-      Node<T>* tmp = first;
-      while (tmp != nullptr)
-      {
-        if (i == index)
-        {
-          return tmp;
-        }
-
-        ++i;
-        tmp = tmp->next;
-      }
-
-      return nullptr;
+      return found->data == value;
     }
 };
 
@@ -258,33 +272,6 @@ void print(const LinkedList<T>& list)
   std::cout << "There are " << list.numElements() << " nodes in the list\n";
 }
 
-template<class T>
-Node<T>* binarySearch(const LinkedList<T>& list, const T& value)
-{
-  size_t left = 0;
-  size_t right = list.numElements();
-
-  while (left <= right)
-  {
-    size_t middle = (right - left) / 2;
-    Node<T>* midNode = list.getNodeAtIndex(middle);
-    if (value == midNode->data) 
-    { 
-      return midNode;
-    }
-    else if (value < midNode->data)
-    {
-      right = middle - 1;
-    }
-    else
-    {
-      left = middle + 1;
-    }
-  }
-
-  return nullptr;
-}
-
 int main()
 {
   LinkedList<int> list;
@@ -305,13 +292,7 @@ int main()
   list.mergeSort();
   std::cout << "After merge sort.\n";
   print(list);
-  Node<int>* found = binarySearch(list, 4);
-  if (found)
-  {
-    std::cout << "Binary search successfully found: " << found->data << std::endl;
-    found = nullptr;
-  }
-  
+  std::cout << "Binary search found 4 " << std::boolalpha << list.binarySearch(4) << std::endl;
   std::cout << "First copy\n";
   LinkedList<int> copylist = list;
   print(copylist);
