@@ -1,28 +1,27 @@
 #include <iostream>
 
-template<class T>
-struct Node 
-{
-    T data;
-    Node* next;
-    Node* prev;
-    Node(const T& oData): data(oData), next(nullptr), prev(nullptr) {}
-};
-
 template <class T>
 class LinkedList 
 {
   private:
-    Node<T>* first;
-    Node<T>* last;
+    struct Node 
+    {
+        T data;
+        Node* next;
+        Node* prev;
+        Node(const T& oData): data(oData), next(nullptr), prev(nullptr) {}
+    };
+
+    Node* first;
+    Node* last;
     size_t numberOfNodes;
 
     void destroy()
     {
-      Node<T>* current = first;
+      Node* current = first;
       while (current != nullptr)
       {
-        Node<T>* next = current->next;
+        Node* next = current->next;
         delete current;
         current = next;
       }
@@ -37,14 +36,14 @@ class LinkedList
         return;
       }
 
-      first = new Node<T>(other.first->data);
-      Node<T>* current = first;
+      first = new Node(other.first->data);
+      Node* current = first;
       numberOfNodes = 1;
       // start from node after first
-      Node<T>* otherCurrent = other.first->next;
+      Node* otherCurrent = other.first->next;
       while(otherCurrent != nullptr)
       {
-        current->next = new Node<T>(otherCurrent->data);
+        current->next = new Node(otherCurrent->data);
         current->next->prev = current;
         otherCurrent = otherCurrent->next;
         current = current->next;
@@ -52,12 +51,12 @@ class LinkedList
       }
     }
 
-    Node<T>* merge(Node<T>* left, Node<T>* right)
+    Node* merge(Node* left, Node* right)
     {
-      Node<T> dummy(0);
-      Node<T>* head = &dummy;
+      Node dummy(0);
+      Node* head = &dummy;
 
-      Node<T>* current = head;
+      Node* current = head;
       while ((left != 0) && (right != 0))
       {
         if (left->data < right->data)
@@ -77,12 +76,12 @@ class LinkedList
       return head->next;
     }
 
-    Node<T>* mergeSortPrivate(Node<T>* current)
+    Node* mergeSortPrivate(Node* current)
     {
       if (current == 0 || current->next == 0) return current;
       
-      Node<T>* left = current;
-      Node<T>* right = current->next;
+      Node* left = current;
+      Node* right = current->next;
 
       // find the middle of the curret list and split it on left and right 
       while ((right != 0) && (right->next != 0))
@@ -96,10 +95,10 @@ class LinkedList
       return merge(mergeSortPrivate(left), mergeSortPrivate(right));
     }
 
-    Node<T>* getMiddle(Node<T>* start, Node<T>* end)
+    Node* getMiddle(Node* start, Node* end)
     {
-      Node<T>* slow = start;
-      Node<T>* fast = start;
+      Node* slow = start;
+      Node* fast = start;
 
       while (fast != end && fast->next != end)
       {
@@ -110,14 +109,14 @@ class LinkedList
       return slow;
     }
 
-    Node<T>* binarySearchPrivate(Node<T>* start, Node<T>* end, const T& value)
+    Node* binarySearchPrivate(Node* start, Node* end, const T& value)
     {
       if (start == end)
       {
         return nullptr;
       }
 
-      Node<T>* mid = getMiddle(start, end);
+      Node* mid = getMiddle(start, end);
 
       if (mid->data == value)
       {
@@ -137,12 +136,12 @@ class LinkedList
     class Iterator 
     {
       private:
-        Node<T>* current;
-        Node<T>* previous;
+        Node* current;
+        Node* previous;
 
       public:
         Iterator(): current(nullptr), previous(nullptr) {}
-        Iterator(Node<T>* node): current(node) {}
+        Iterator(Node* node): current(node) {}
         Iterator& operator++()
         {
           if (current != nullptr)
@@ -185,14 +184,14 @@ class LinkedList
     {
         if (!first)
         {
-          first = new Node<T>(value);
+          first = new Node(value);
           last = first;
           ++numberOfNodes;
           return;
         }
         if (last == first)
         {
-          Node<T> *second = new Node<T>(value);
+          Node* second = new Node(value);
           first->next = second;
           second->prev = first;
           last = second;
@@ -200,7 +199,7 @@ class LinkedList
           ++numberOfNodes;
           return;
         }
-        Node<T> *newLast = new Node<T>(value);
+        Node* newLast = new Node(value);
         last->next = newLast;
         newLast->prev = last;
         last = newLast;
@@ -210,7 +209,7 @@ class LinkedList
 
     T popFont()
     {
-      Node<T>* toPop = first;
+      Node* toPop = first;
       T toPopData = toPop->data;
       // make sure that the node after the first has previous null
       if (first->next != nullptr)
@@ -225,7 +224,7 @@ class LinkedList
 
     T popBack()
     {
-      Node<T>* toPop = last;
+      Node* toPop = last;
       T toPopData = toPop->data;
       // make sure that the node before the last has next null
       if (last->prev != nullptr)
@@ -241,7 +240,7 @@ class LinkedList
     void mergeSort() { first = mergeSortPrivate(first); }
     bool binarySearch(const T& value)
     {
-      Node<T>* found = binarySearchPrivate(first, last, value);
+      Node* found = binarySearchPrivate(first, last, value);
       if (!found)
       {
         return false;
