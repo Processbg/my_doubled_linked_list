@@ -159,11 +159,12 @@ class LinkedList
         }
         bool operator!=(const Iterator& other){ return current != other.current; }
         bool operator==(const Iterator& other){ return !(*this!=other); }
-        T operator*(){ return current->data; }
+        const T& operator*() const { return current->data; }
+        T& operator*(){ return current->data; }
     };
 
     LinkedList(): first(nullptr), last(nullptr), numberOfNodes(0) {}
-    LinkedList(const LinkedList& other){ copy(other); }
+    LinkedList(const LinkedList& other): first(nullptr), last(nullptr), numberOfNodes(0) { copy(other); }
     LinkedList& operator=(const LinkedList& other)
     {
       if (this != &other)
@@ -180,61 +181,74 @@ class LinkedList
     Iterator end() const { return Iterator(); }
     bool isEmpty() const { return numberOfNodes == 0; }
     size_t numElements() const { return numberOfNodes; }
-    void insertBack(const T& value)
+    void pushBack(const T& value)
     {
-        if (!first)
+        Node* newNode = new Node(value);
+        if (last)
         {
-          first = new Node(value);
-          last = first;
-          ++numberOfNodes;
-          return;
-        }
-        if (last == first)
+          last->next = newNode;
+          newNode->prev = last;
+        } 
+        else 
         {
-          Node* second = new Node(value);
-          first->next = second;
-          second->prev = first;
-          last = second;
-          second = nullptr;
-          ++numberOfNodes;
-          return;
+          first = newNode;
         }
-        Node* newLast = new Node(value);
-        last->next = newLast;
-        newLast->prev = last;
-        last = newLast;
-        newLast = nullptr;
+        last = newNode;
         ++numberOfNodes;
     }
 
-    T popFont()
+    void pushFront(const T& value)
     {
+        Node* newNode = new Node(value);
+        if (first)
+        {
+          first->prev = newNode;
+          newNode->next = first;
+        } 
+        else 
+        {
+          last = newNode;
+        }
+        first = newNode;
+        ++numberOfNodes;
+    }
+
+    T& front() { return first->data; }
+    const T& front() const { return first->data; }
+
+    void popFont()
+    {
+      if (!first) return;
+      
       Node* toPop = first;
-      T toPopData = toPop->data;
       // make sure that the node after the first has previous null
-      if (first->next != nullptr)
+      if (first->next)
       {
         first->next->prev = nullptr;
       }
       first = first->next;
+      if (!first) last = nullptr;
       delete toPop;
       --numberOfNodes;
-      return toPopData;
     }
 
-    T popBack()
+    T& back() { return last->data; }
+    const T& back() const { return last->data; }
+
+    void popBack()
     {
+      if (!last)  return;
+
       Node* toPop = last;
-      T toPopData = toPop->data;
       // make sure that the node before the last has next null
-      if (last->prev != nullptr)
+      if (last->prev)
       {
         last->prev->next = nullptr;
       }
       last = last->prev;
+      if (!last) first = nullptr;
       delete toPop;
       --numberOfNodes;
-      return toPopData;
     }
     
     void mergeSort() { first = mergeSortPrivate(first); }
@@ -249,6 +263,21 @@ class LinkedList
       return found->data == value;
     }
 };
+
+template<class T>
+bool find(const LinkedList<T>& list, const T& value)
+{
+  typename LinkedList<T>::Iterator it = list.begin();
+  for (; it != list.end(); ++it)
+  {
+    if (*it == value)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 template<class T>
 void print(const LinkedList<T>& list)
@@ -275,22 +304,27 @@ int main()
 {
   LinkedList<int> list;
   
-  list.insertBack(1);
-  list.insertBack(5);
-  list.insertBack(1234);
-  list.insertBack(7);
-  list.insertBack(4);
-  list.insertBack(12344);
-  list.insertBack(13);
+  list.pushBack(1);
+  list.pushBack(5);
+  list.pushBack(1234);
+  list.pushBack(7);
+  list.pushBack(4);
+  list.pushBack(12344);
+  list.pushBack(13);
   
-  std::cout << "Poped front value: " << list.popFont() << std::endl;
-  std::cout << "Poped back value: " << list.popBack() << std::endl;
+  int topPopFront = list.front();
+  list.popFont();
+  std::cout << "Poped front value: " << topPopFront << std::endl;
+  int topPopBack = list.back();
+  list.popBack();
+  std::cout << "Poped back value: " << topPopBack << std::endl;
 
   std::cout << "Before merge sort.\n";
   print(list);
   list.mergeSort();
   std::cout << "After merge sort.\n";
   print(list);
+  std::cout << "Normal search found 4 " << std::boolalpha << find(list, 4) << std::endl;
   std::cout << "Binary search found 4 " << std::boolalpha << list.binarySearch(4) << std::endl;
   std::cout << "First copy\n";
   LinkedList<int> copylist = list;
