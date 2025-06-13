@@ -14,7 +14,7 @@ class LinkedList
 
     Node* first;
     Node* last;
-    size_t numberOfNodes;
+    int numberOfNodes;
 
     void destroy()
     {
