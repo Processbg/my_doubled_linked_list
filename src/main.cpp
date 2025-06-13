@@ -186,8 +186,8 @@ class LinkedList
         Node* newNode = new Node(value);
         if (last)
         {
-          last->next = newNode;
           newNode->prev = last;
+          last->next = newNode;
         } 
         else 
         {
@@ -202,8 +202,8 @@ class LinkedList
         Node* newNode = new Node(value);
         if (first)
         {
-          first->prev = newNode;
           newNode->next = first;
+          first->prev = newNode;
         } 
         else 
         {
