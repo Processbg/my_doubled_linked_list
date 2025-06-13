@@ -137,16 +137,14 @@ class LinkedList
     {
       private:
         Node* current;
-        Node* previous;
 
       public:
-        Iterator(): current(nullptr), previous(nullptr) {}
+        Iterator(): current(nullptr) {}
         Iterator(Node* node): current(node) {}
         Iterator& operator++()
         {
-          if (current != nullptr)
+          if (current)
           {
-            previous = current;
             current = current->next;
           }
           return *this;
@@ -154,13 +152,57 @@ class LinkedList
         Iterator operator++(int)
         {
           Iterator tempIter = *this;
-          ++*this;
+          ++(*this);
           return tempIter;
         }
-        bool operator!=(const Iterator& other){ return current != other.current; }
-        bool operator==(const Iterator& other){ return !(*this!=other); }
-        const T& operator*() const { return current->data; }
+        Iterator& operator--()
+        {
+          if (current)
+          {
+            current = current->prev;
+          }
+          return *this;
+        }
+        bool operator!=(const Iterator& other) const { return current != other.current; }
+        bool operator==(const Iterator& other) const { return !(*this!=other); }
         T& operator*(){ return current->data; }
+    };
+
+    class const_Iterator
+    {
+      private:
+        const Node* current;
+      
+      public:
+        const_Iterator() : current(nullptr) {};
+        const_Iterator(const Node* node): current(node) {}
+        // Construct const_iterator from non-const iterator
+        const_Iterator(const Iterator& it): current(it.current) {}
+        const_Iterator& operator++()
+        {
+          if (current)
+          {
+            current = current->next;
+          }
+          return *this;
+        }
+        const_Iterator operator++(int)
+        {
+          const_Iterator tempIt = *this;
+          ++(*this);
+          return tempIt;
+        }
+        const_Iterator& operator--()
+        {
+          if (current)
+          {
+            current = current->prev;
+          }
+          return *this;
+        }
+        bool operator!=(const const_Iterator& other) const { return current != other.current; }
+        bool operator==(const const_Iterator& other) const { return !(*this!=other); }
+        const T& operator*() const { return current->data; };
     };
 
     LinkedList(): first(nullptr), last(nullptr), numberOfNodes(0) {}
@@ -177,8 +219,13 @@ class LinkedList
     }
     ~LinkedList() { destroy(); }
 
-    Iterator begin() const { return Iterator(first); }
-    Iterator end() const { return Iterator(); }
+    Iterator begin() { return Iterator(first); }
+    Iterator end() { return Iterator(); }
+    const_Iterator begin() const { return const_Iterator(first); }
+    const_Iterator end() const { return const_Iterator(); }
+    const_Iterator cbegin() const { return const_Iterator(first); }
+    const_Iterator cend() const { return const_Iterator(); }
+
     bool isEmpty() const { return numberOfNodes == 0; }
     size_t numElements() const { return numberOfNodes; }
     void pushBack(const T& value)
@@ -265,10 +312,10 @@ class LinkedList
 };
 
 template<class T>
-typename LinkedList<T>::Iterator find(const LinkedList<T>& list, const T& value)
+typename LinkedList<T>::const_Iterator find(const LinkedList<T>& list, const T& value)
 {
-  typename LinkedList<T>::Iterator it = list.begin();
-  for (; it != list.end(); ++it)
+  typename LinkedList<T>::const_Iterator it = list.cbegin();
+  for (; it != list.cend(); ++it)
   {
     if (*it == value)
     {
@@ -276,14 +323,14 @@ typename LinkedList<T>::Iterator find(const LinkedList<T>& list, const T& value)
     }
   }
 
-  return list.end();
+  return list.cend();
 }
 
 template<class T>
 void print(const LinkedList<T>& list)
 {
   std::cout << "contents of list are [";
-  typename LinkedList<T>::Iterator it = list.begin();
+  typename LinkedList<T>::const_Iterator it = list.begin();
   while (it != list.end())
   {
     if (it == list.begin())
