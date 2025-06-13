@@ -252,31 +252,31 @@ class LinkedList
     }
     
     void mergeSort() { first = mergeSortPrivate(first); }
-    bool binarySearch(const T& value)
+    Iterator binarySearch(const T& value)
     {
       Node* found = binarySearchPrivate(first, last, value);
       if (!found)
       {
-        return false;
+        return end();
       }
 
-      return found->data == value;
+      return Iterator(found);
     }
 };
 
 template<class T>
-bool find(const LinkedList<T>& list, const T& value)
+typename LinkedList<T>::Iterator find(const LinkedList<T>& list, const T& value)
 {
   typename LinkedList<T>::Iterator it = list.begin();
   for (; it != list.end(); ++it)
   {
     if (*it == value)
     {
-      return true;
+      return it;
     }
   }
 
-  return false;
+  return list.end();
 }
 
 template<class T>
@@ -324,8 +324,8 @@ int main()
   list.mergeSort();
   std::cout << "After merge sort.\n";
   print(list);
-  std::cout << "Normal search found 4 " << std::boolalpha << find(list, 4) << std::endl;
-  std::cout << "Binary search found 4 " << std::boolalpha << list.binarySearch(4) << std::endl;
+  std::cout << "Normal search found " << std::boolalpha << *find(list, 4) << std::endl;
+  std::cout << "Binary search found " << std::boolalpha << *list.binarySearch(4) << std::endl;
   std::cout << "First copy\n";
   LinkedList<int> copylist = list;
   print(copylist);
