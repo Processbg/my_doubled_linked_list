@@ -33,6 +33,7 @@ class LinkedList
     {
       if (other.first == nullptr)
       {
+        first = last = nullptr;
         return;
       }
 
@@ -49,6 +50,7 @@ class LinkedList
         current = current->next;
         ++numberOfNodes; 
       }
+      last = current;
     }
 
     Node* merge(Node* left, Node* right)
@@ -376,9 +378,21 @@ int main()
   std::cout << "First copy\n";
   LinkedList<int> copylist = list;
   print(copylist);
+  topPopFront = copylist.front();
+  copylist.popFont();
+  std::cout << "Poped front value: " << topPopFront << std::endl;
+  topPopBack = copylist.back();
+  copylist.popBack();
+  std::cout << "Poped back value: " << topPopBack << std::endl;
   std::cout << "Second copy\n";
   LinkedList<int> otherCopylist;
   otherCopylist = list;
+  topPopFront = otherCopylist.front();
+  otherCopylist.popFont();
+  std::cout << "Poped front value: " << topPopFront << std::endl;
+  topPopBack = otherCopylist.back();
+  otherCopylist.popBack();
+  std::cout << "Poped back value: " << topPopBack << std::endl;
   print(otherCopylist);
 
   return 0;
