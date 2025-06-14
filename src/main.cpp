@@ -53,51 +53,66 @@ class LinkedList
       last = current;
     }
 
-    Node* merge(Node* left, Node* right)
+    static Node* merge(Node* left, Node* right)
     {
       Node dummy(0);
       Node* head = &dummy;
 
       Node* current = head;
-      while ((left != 0) && (right != 0))
+      while (left && right)
       {
         if (left->data < right->data)
         {
           current->next = left;
+          left->prev = current;
           current = left;
           left = left->next;
         }
         else
         {
           current->next = right;
+          right->prev = current;
           current = right;
           right = right->next;
         }
       }
-      current->next = (left == 0) ? right : left;
-      return head->next;
+      
+      Node* remaining = (left) ? left : right;
+      while (remaining)
+      {
+        current->next = remaining;
+        remaining->prev = current;
+        current = remaining;
+        remaining = remaining->next;
+      }
+
+      Node* sortedHead = head->next;
+      if (sortedHead) sortedHead->prev = nullptr;
+      return sortedHead;
     }
 
-    Node* mergeSortPrivate(Node* current)
+    static Node* mergeSortPrivate(Node* current)
     {
-      if (current == 0 || current->next == 0) return current;
+      if (!current || !current->next) return current;
       
       Node* left = current;
       Node* right = current->next;
 
       // find the middle of the curret list and split it on left and right 
-      while ((right != 0) && (right->next != 0))
+      while (right && right->next)
       {
         current = current->next;
         right = right->next->next;
       }
       // right starts from current->next
       right = current->next;
-      current->next = 0;
+      if (current->next) current->next->prev = nullptr;
+      current->next = nullptr;
+      
       return merge(mergeSortPrivate(left), mergeSortPrivate(right));
     }
 
-    Node* getMiddle(Node* start, Node* end)
+    static Node* getMiddle(Node* start, Node* end)
     {
       Node* slow = start;
       Node* fast = start;
@@ -111,7 +126,7 @@ class LinkedList
       return slow;
     }
 
-    Node* binarySearchPrivate(Node* start, Node* end, const T& value)
+    static Node* binarySearchPrivate(Node* start, Node* end, const T& value)
     {
       if (start == end)
       {
@@ -229,7 +244,7 @@ class LinkedList
     const_Iterator cend() const { return const_Iterator(); }
 
     bool isEmpty() const { return numberOfNodes == 0; }
-    size_t numElements() const { return numberOfNodes; }
+    int numElements() const { return numberOfNodes; }
     void pushBack(const T& value)
     {
         Node* newNode = new Node(value);
@@ -299,17 +314,62 @@ class LinkedList
       delete toPop;
       --numberOfNodes;
     }
+
+    void remove(const T& value)
+    {
+      Node* current = first;
+      while (current)
+      {
+        if (current->data == value)
+        {
+          if (current == first)
+          {
+            // Node is the head
+            first = current->next;
+            if (first) first->prev = nullptr;
+            else last = nullptr;
+          }
+          else if (current == last)
+          {
+            // Node is the tail
+            last = current->prev;
+            if (last) last->next = nullptr;
+            else first = nullptr;
+          }
+          else
+          {
+            // Node is in the middle
+            current->next->prev = current->prev;
+            current->prev->next = current->next;
+          }
+          delete current;
+          --numberOfNodes;
+          return;
+        }
+        current = current->next;
+      }
+    }
     
-    void mergeSort() { first = mergeSortPrivate(first); }
-    Iterator binarySearch(const T& value)
+    void mergeSort()
+    {
+      first = mergeSortPrivate(first);
+      // Recompute tail:
+      last = first;
+      while (last && last->next)
+      {
+        last = last->next;
+      }
+    }
+
+    const_Iterator binarySearch(const T& value)
     {
       Node* found = binarySearchPrivate(first, last, value);
       if (!found)
       {
-        return end();
+        return const_Iterator();
       }
 
-      return Iterator(found);
+      return const_Iterator(found);
     }
 };
 
@@ -361,12 +421,18 @@ int main()
   list.pushBack(12344);
   list.pushBack(13);
   
+  print(list);
+  list.remove(12344);
+  std::cout << "Removed element 12344." << std::endl;
+  print(list);
+  
   int topPopFront = list.front();
   list.popFont();
   std::cout << "Poped front value: " << topPopFront << std::endl;
   int topPopBack = list.back();
   list.popBack();
   std::cout << "Poped back value: " << topPopBack << std::endl;
+  print(list);
 
   std::cout << "Before merge sort.\n";
   print(list);
@@ -375,6 +441,7 @@ int main()
   print(list);
   std::cout << "Normal search found " << std::boolalpha << *find(list, 4) << std::endl;
   std::cout << "Binary search found " << std::boolalpha << *list.binarySearch(4) << std::endl;
+  
   std::cout << "First copy\n";
   LinkedList<int> copylist = list;
   print(copylist);
@@ -384,6 +451,8 @@ int main()
   topPopBack = copylist.back();
   copylist.popBack();
   std::cout << "Poped back value: " << topPopBack << std::endl;
+  print(copylist);
+
   std::cout << "Second copy\n";
   LinkedList<int> otherCopylist;
   otherCopylist = list;
